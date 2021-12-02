@@ -200,6 +200,7 @@ export class UrlPlugin {
   constructor(options = {}) {
     this.bookReaderOptions = options;
 
+    // the canonical order of elements is important in the path and query string
     this.urlSchema = [
       { name: 'page', position: 'path', default: 'n0' },
       { name: 'mode', position: 'path', default: '2up' },
@@ -221,7 +222,8 @@ export class UrlPlugin {
   /**
    * Parse JSON object URL state to string format
    * Arrange path names in an order that it is positioned on the urlSchema
-   * @param {object} urlState
+   * @param {object} urlSchema
+   * @param {string} urlState
    * @returns {string}
    */
   urlStateToUrlString(urlSchema, urlState) {
@@ -256,10 +258,10 @@ export class UrlPlugin {
    *  /page/n7/mode/2up => {page: 'n7', mode: '2up'}
    *  /page/n7/mode/2up/search/hello => {page: 'n7', mode: '2up', q: 'hello'}
    * @param {array} urlSchema
-   * @param {string} str
+   * @param {string} urlString
    * @returns {object}
    */
-  urlStringToUrlState(urlSchema, str) {
+  urlStringToUrlState(urlSchema, urlString) {
     const urlState = {};
 
     // Fetch searchParams from given {str}
@@ -274,6 +276,7 @@ export class UrlPlugin {
       return Object.keys(_object).some(value => value == _key);
     };
 
+    // Add path objects to urlState
     urlSchema
       .filter(schema => schema.position == 'path')
       .forEach(schema => {
@@ -283,11 +286,15 @@ export class UrlPlugin {
         const hasPropertyKey = doesKeyExists(urlStrSplitSlashObj, schema.name);
         const hasDeprecatedKey = doesKeyExists(schema, 'deprecated_for') && hasPropertyKey;
 
-        if (hasDeprecatedKey)
-          return urlState[schema.deprecated_for] = urlStrSplitSlashObj[schema.name];
+        if (hasDeprecatedKey) {
+          urlState[schema.deprecated_for] = urlStrSplitSlashObj[schema.name];
+          return;
+        }
 
-        if (hasPropertyKey)
-          return urlState[schema.name] = urlStrSplitSlashObj[schema.name];
+        if (hasPropertyKey) {
+          urlState[schema.name] = urlStrSplitSlashObj[schema.name];
+          return;
+        }
       });
 
     // Add searchParams to urlState
