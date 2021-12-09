@@ -17,44 +17,35 @@ afterEach(() => {
 
 describe.only('UrlPlugin tests', () => {
   const urlPlugin = new UrlPlugin();
-  const urlSchema = [
-    { name: 'page', position: 'path', default: 'n0' },
-    { name: 'mode', position: 'path', default: '2up' },
-    { name: 'search', position: 'path', deprecated_for: 'q' },
-    { name: 'q', position: 'query_param' },
-    { name: 'sort', position: 'query_param' },
-    { name: 'view', position: 'query_param' },
-    { name: 'admin', position: 'query_param' },
-  ];
 
   describe('urlStateToUrlString tests', () => {
     test('urlStateToUrlString with known states in schema', () => {
       const urlState = { page: 'n7', mode: '1up', search: 'foo' };
       const urlStateWithQueries = { page: 'n7', mode: '1up', q: 'hello', view: 'theater', sort: 'title_asc' };
 
-      const expectedUrlFromState = '/page/n7/mode/1up?q=foo';
-      const expectedUrlFromStateWithQueries = '/page/n7/mode/1up?q=hello&view=theater&sort=title_asc';
+      const expectedUrlFromState = 'page/n7/mode/1up?q=foo';
+      const expectedUrlFromStateWithQueries = 'page/n7/mode/1up?q=hello&view=theater&sort=title_asc';
 
-      expect(urlPlugin.urlStateToUrlString(urlSchema, urlState)).toBe(expectedUrlFromState);
-      expect(urlPlugin.urlStateToUrlString(urlSchema, urlStateWithQueries)).toBe(expectedUrlFromStateWithQueries);
+      expect(urlPlugin.urlStateToUrlString(urlState)).toBe(expectedUrlFromState);
+      expect(urlPlugin.urlStateToUrlString(urlStateWithQueries)).toBe(expectedUrlFromStateWithQueries);
     });
 
     test('urlStateToUrlString with unknown states in schema', () => {
       const urlState = { page: 'n7', mode: '1up' };
       const urlStateWithQueries = { page: 'n7', mode: '1up', q: 'hello', viewer: 'theater', sortBy: 'title_asc' };
 
-      const expectedUrlFromState = '/page/n7/mode/1up';
-      const expectedUrlFromStateWithQueries = '/page/n7/mode/1up?q=hello&viewer=theater&sortBy=title_asc';
+      const expectedUrlFromState = 'page/n7/mode/1up';
+      const expectedUrlFromStateWithQueries = 'page/n7/mode/1up?q=hello&viewer=theater&sortBy=title_asc';
 
-      expect(urlPlugin.urlStateToUrlString(urlSchema, urlState)).toBe(expectedUrlFromState);
-      expect(urlPlugin.urlStateToUrlString(urlSchema, urlStateWithQueries)).toBe(expectedUrlFromStateWithQueries);
+      expect(urlPlugin.urlStateToUrlString(urlState)).toBe(expectedUrlFromState);
+      expect(urlPlugin.urlStateToUrlString(urlStateWithQueries)).toBe(expectedUrlFromStateWithQueries);
     });
 
     test('urlStateToUrlString with boolean value', () => {
       const urlState = { page: 'n7', mode: '1up', search: 'foo', view: 'theater', wrapper: false };
-      const expectedUrlFromState = '/page/n7/mode/1up?q=foo&view=theater&wrapper=false';
+      const expectedUrlFromState = 'page/n7/mode/1up?q=foo&view=theater&wrapper=false';
 
-      expect(urlPlugin.urlStateToUrlString(urlSchema, urlState)).toBe(expectedUrlFromState);
+      expect(urlPlugin.urlStateToUrlString(urlState)).toBe(expectedUrlFromState);
     });
   });
 
@@ -63,24 +54,24 @@ describe.only('UrlPlugin tests', () => {
       const url = '/page/n7/mode/2up';
       const url1 = '/page/n7/mode/1up';
 
-      expect(urlPlugin.urlStringToUrlState(urlSchema, url)).toEqual({page: 'n7', mode: '2up'});
-      expect(urlPlugin.urlStringToUrlState(urlSchema, url1)).toEqual({page: 'n7', mode: '1up'});
+      expect(urlPlugin.urlStringToUrlState(url)).toEqual({page: 'n7', mode: '2up'});
+      expect(urlPlugin.urlStringToUrlState(url1)).toEqual({page: 'n7', mode: '1up'});
     });
 
     test('urlStringToUrlState with deprecated_for', () => {
       const url = '/page/n7/mode/2up/search/hello';
 
-      expect(urlPlugin.urlStringToUrlState(urlSchema, url)).toEqual({page: 'n7', mode: '2up', q: 'hello'});
+      expect(urlPlugin.urlStringToUrlState(url)).toEqual({page: 'n7', mode: '2up', q: 'hello'});
     });
 
     test('urlStringToUrlState with query string', () => {
       const url = '/page/n7/mode/2up/search/hello?view=theather&foo=bar&sort=title_asc';
       const url1 = '/mode/2up?ref=ol&ui=embed&wrapper=false&view=theater';
 
-      expect(urlPlugin.urlStringToUrlState(urlSchema, url)).toEqual(
+      expect(urlPlugin.urlStringToUrlState(url)).toEqual(
         {page: 'n7', mode: '2up', q: 'hello', view: 'theather', foo: 'bar', sort: 'title_asc'}
       );
-      expect(urlPlugin.urlStringToUrlState(urlSchema, url1)).toEqual(
+      expect(urlPlugin.urlStringToUrlState(url1)).toEqual(
         {page: 'n0', mode: '2up', ref: 'ol', ui: 'embed', wrapper: false, view: 'theater'}
       );
     });
@@ -89,7 +80,7 @@ describe.only('UrlPlugin tests', () => {
       const url = '/page/n7/mode/2up/search/hello';
       urlPlugin.urlState = { q: 'hello' };
 
-      expect(urlPlugin.urlStringToUrlState(urlSchema, url)).toEqual({page: 'n7', mode: '2up', q: 'hello'});
+      expect(urlPlugin.urlStringToUrlState(url)).toEqual({page: 'n7', mode: '2up', q: 'hello'});
     });
   });
 
@@ -123,22 +114,22 @@ describe.only('UrlPlugin tests', () => {
       urlPlugin.urlState = {};
       urlPlugin.urlMode = 'hash';
 
-      urlPlugin.pullFromAddressBar({ pathname: '/page/12', search: '', hash: '' });
+      urlPlugin.pullFromAddressBar({ pathname: '', search: '', hash: '#page/12' });
       expect(urlPlugin.urlState).toEqual({page: '12', mode: '2up'});
 
       urlPlugin.pushToAddressBar();
-      expect(window.location.hash).toEqual('#/page/12/mode/2up');
+      expect(window.location.hash).toEqual('#page/12/mode/2up');
     });
 
     test('url with query param', () => {
       urlPlugin.urlState = {};
       urlPlugin.urlMode = 'hash';
 
-      urlPlugin.pullFromAddressBar({ pathname: '/page/12', search: '?q=hello&view=theater', hash: '' });
+      urlPlugin.pullFromAddressBar({ pathname: '', search: '', hash: '#page/12?q=hello&view=theater' });
       expect(urlPlugin.urlState).toEqual({page: '12', mode: '2up', q: 'hello', view: 'theater'});
 
       urlPlugin.pushToAddressBar();
-      expect(window.location.hash).toEqual('#/page/12/mode/2up?q=hello&view=theater');
+      expect(window.location.hash).toEqual('#page/12/mode/2up?q=hello&view=theater');
     });
   });
 

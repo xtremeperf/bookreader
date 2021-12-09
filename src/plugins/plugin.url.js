@@ -212,8 +212,8 @@ export class UrlPlugin {
     ];
 
     this.urlState = {};
-    this.urlMode = 'hash';
-    this.urlHistoryBasePath = '/';
+    this.urlMode = this.bookReaderOptions.urlMode || 'hash';
+    this.urlHistoryBasePath = this.bookReaderOptions.urlHistoryBasePath ||  '/';
     this.urlLocationPollId = null;
     this.oldLocationHash = null;
     this.oldUserHash = null;
@@ -222,18 +222,17 @@ export class UrlPlugin {
   /**
    * Parse JSON object URL state to string format
    * Arrange path names in an order that it is positioned on the urlSchema
-   * @param {object} urlSchema
-   * @param {string} urlState
+   * @param {Object} urlState
    * @returns {string}
    */
-  urlStateToUrlString(urlSchema, urlState) {
+  urlStateToUrlString(urlState) {
     const searchParams = new URLSearchParams();
     const pathParams = {};
 
     Object.keys(urlState).forEach(key => {
-      let schema = urlSchema.find(schema => schema.name === key);
+      let schema = this.urlSchema.find(schema => schema.name === key);
       if (schema?.deprecated_for) {
-        schema = urlSchema.find(schemaKey => schemaKey.name === schema.deprecated_for);
+        schema = this.urlSchema.find(schemaKey => schemaKey.name === schema.deprecated_for);
       }
       if (schema?.position == 'path') {
         pathParams[schema?.name] = urlState[key];
@@ -242,14 +241,14 @@ export class UrlPlugin {
       }
     });
 
-    const strPathParams = urlSchema
+    const strPathParams = this.urlSchema
       .filter(s => s.position == 'path')
       .map(schema => pathParams[schema.name] ? `${schema.name}/${pathParams[schema.name]}` : '')
       .join('/');
 
     const strStrippedTrailingSlash = `${strPathParams.replace(/\/$/, '')}`;
-    const concatenatedPath = `/${strStrippedTrailingSlash}?${searchParams.toString()}`;
-    return searchParams.toString() ? concatenatedPath : `/${strStrippedTrailingSlash}`;
+    const concatenatedPath = `${strStrippedTrailingSlash}?${searchParams.toString()}`;
+    return searchParams.toString() ? concatenatedPath : `${strStrippedTrailingSlash}`;
   }
 
   /**
@@ -257,11 +256,10 @@ export class UrlPlugin {
    * Example:
    *  /page/n7/mode/2up => {page: 'n7', mode: '2up'}
    *  /page/n7/mode/2up/search/hello => {page: 'n7', mode: '2up', q: 'hello'}
-   * @param {array} urlSchema
    * @param {string} urlString
    * @returns {object}
    */
-  urlStringToUrlState(urlSchema, urlString) {
+  urlStringToUrlState(urlString) {
     const urlState = {};
 
     // Fetch searchParams from given {str}
@@ -277,7 +275,7 @@ export class UrlPlugin {
     };
 
     // Add path objects to urlState
-    urlSchema
+    this.urlSchema
       .filter(schema => schema.position == 'path')
       .forEach(schema => {
         if (!urlStrSplitSlashObj[schema.name] && schema.default) {
@@ -339,10 +337,10 @@ export class UrlPlugin {
    * Push URL params to addressbar
    */
   pushToAddressBar() {
-    const urlStrPath = this.urlStateToUrlString(this.urlSchema, this.urlState);
+    const urlStrPath = this.urlStateToUrlString(this.urlState);
     if (this.urlMode == 'history') {
       if (window.history && window.history.replaceState) {
-        const newUrlPath = `${this.urlHistoryBasePath}${urlStrPath}`;
+        const newUrlPath = `${this.urlHistoryBasePath}/${urlStrPath}`;
         window.history.replaceState({}, null, newUrlPath);
       }
     } else {
@@ -381,7 +379,7 @@ export class UrlPlugin {
     const path = this.urlMode === 'history'
       ? (location.pathname.substr(this.urlHistoryBasePath.length) + location.search)
       : location.hash.substr(1);
-    this.urlState = this.urlStringToUrlState(this.urlSchema, path);
+    this.urlState = this.urlStringToUrlState(path);
   }
 }
 

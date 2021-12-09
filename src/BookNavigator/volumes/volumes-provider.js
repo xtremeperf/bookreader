@@ -37,10 +37,9 @@ export default class VolumesProvider {
     this.icon = html`${volumesIcon}`;
 
     // get sort state from query param
-    console.log('location: ', location)
-    this.bookreader.urlPlugin.pullFromAddressBar(location.pathname + location.search);
+    this.bookreader.urlPlugin.pullFromAddressBar();
+
     const urlSortValue = this.bookreader.urlPlugin.getUrlParam('sort');
-    console.log('urlSortValue: ', urlSortValue);
     if (urlSortValue === sortType.title_asc || urlSortValue === sortType.title_desc) {
       this.sortOrderBy = urlSortValue;
     } else {
