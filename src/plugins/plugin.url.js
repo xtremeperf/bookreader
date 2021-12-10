@@ -264,7 +264,7 @@ export class UrlPlugin {
 
     // Fetch searchParams from given {str}
     // Note: whole URL path is needed for URL parsing
-    const urlPath = new URL(str, 'http://example.com');
+    const urlPath = new URL(urlString, 'http://example.com');
     const urlSearchParamsObj = Object.fromEntries(urlPath.searchParams.entries());
     const urlStrSplitSlashObj = Object.fromEntries(urlPath.pathname
       .match(/[^\\/]+\/[^\\/]+/g)
@@ -384,7 +384,6 @@ export class UrlPlugin {
 }
 
 export class BookreaderUrlPlugin extends BookReader {
-
   init() {
     if (this.options.enableUrlPlugin) {
       this.urlPlugin = new UrlPlugin(this.options);
@@ -399,7 +398,6 @@ export class BookreaderUrlPlugin extends BookReader {
 
     super.init();
   }
-
 }
 
 window.BookReader = BookreaderUrlPlugin;
