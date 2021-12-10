@@ -42,7 +42,7 @@ describe.only('UrlPlugin tests', () => {
     });
 
     test('urlStateToUrlString with boolean value', () => {
-      const urlState = { page: 'n7', mode: '1up', search: 'foo', view: 'theater', wrapper: false };
+      const urlState = { page: 'n7', mode: '1up', search: 'foo', view: 'theater', wrapper: 'false' };
       const expectedUrlFromState = 'page/n7/mode/1up?q=foo&view=theater&wrapper=false';
 
       expect(urlPlugin.urlStateToUrlString(urlState)).toBe(expectedUrlFromState);
@@ -72,7 +72,7 @@ describe.only('UrlPlugin tests', () => {
         {page: 'n7', mode: '2up', q: 'hello', view: 'theather', foo: 'bar', sort: 'title_asc'}
       );
       expect(urlPlugin.urlStringToUrlState(url1)).toEqual(
-        {page: 'n0', mode: '2up', ref: 'ol', ui: 'embed', wrapper: false, view: 'theater'}
+        {page: 'n0', mode: '2up', ref: 'ol', ui: 'embed', wrapper: 'false', view: 'theater'}
       );
     });
 
