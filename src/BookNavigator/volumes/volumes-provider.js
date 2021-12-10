@@ -36,14 +36,16 @@ export default class VolumesProvider {
     this.label = `Viewable files (${this.volumeCount})`;
     this.icon = html`${volumesIcon}`;
 
-    // get sort state from query param
-    this.bookreader.urlPlugin.pullFromAddressBar();
+    this.sortOrderBy = sortType.default;
 
-    const urlSortValue = this.bookreader.urlPlugin.getUrlParam('sort');
-    if (urlSortValue === sortType.title_asc || urlSortValue === sortType.title_desc) {
-      this.sortOrderBy = urlSortValue;
-    } else {
-      this.sortOrderBy = sortType.default;
+    // get sort state from query param
+    if (this.bookreader.urlPlugin) {
+      this.bookreader.urlPlugin.pullFromAddressBar();
+
+      const urlSortValue = this.bookreader.urlPlugin.getUrlParam('sort');
+      if (urlSortValue === sortType.title_asc || urlSortValue === sortType.title_desc) {
+        this.sortOrderBy = urlSortValue;
+      }
     }
     this.sortVolumes(this.sortOrderBy);
   }
@@ -81,16 +83,13 @@ export default class VolumesProvider {
     this.component.viewableFiles  = [...sortedFiles];
     this.actionButton = this.sortButton;
 
-    if (this.sortOrderBy !== sortType.default) {
-      this.bookreader.urlPlugin.setUrlParam('sort', sortByType);
-    } else {
-      this.bookreader.urlPlugin.removeUrlParam('sort');
+    if (this.bookreader.urlPlugin) {
+      if (this.sortOrderBy !== sortType.default) {
+        this.bookreader.urlPlugin.setUrlParam('sort', sortByType);
+      } else {
+        this.bookreader.urlPlugin.removeUrlParam('sort');
+      }
     }
-
-    const urlSchema = this.bookreader.urlPlugin.urlSchema;
-    const urlState = this.bookreader.urlPlugin.urlState;
-    this.bookreader.urlPlugin.urlStateToUrlString(urlSchema, urlState);
-    this.bookreader.urlPlugin.pushToAddressBar();
 
     this.optionChange(this.bookreader);
 
