@@ -136,7 +136,7 @@ describe.only('UrlPlugin tests', () => {
   describe('pullFromAddressBar and pushToAddressBar - history mode', () => {
     test('url without mode state value - use default', () => {
       urlPlugin.urlState = {};
-      urlPlugin.urlHistoryBasePath = '/details/foo';
+      urlPlugin.urlHistoryBasePath = '/details/foo/';
       urlPlugin.urlMode = 'history';
 
       urlPlugin.pullFromAddressBar({ pathname: '/details/foo/page/12', search: '', hash: '' });
@@ -148,7 +148,7 @@ describe.only('UrlPlugin tests', () => {
 
     test('url with query param', () => {
       urlPlugin.urlState = {};
-      urlPlugin.urlHistoryBasePath = '/details/foo';
+      urlPlugin.urlHistoryBasePath = '/details/foo/';
       urlPlugin.urlMode = 'history';
 
       urlPlugin.pullFromAddressBar({ pathname: '/details/foo/page/12', search: '?q=hello&view=theater', hash: '' });

@@ -266,10 +266,9 @@ export class UrlPlugin {
     // Note: whole URL path is needed for URL parsing
     const urlPath = new URL(urlString, 'http://example.com');
     const urlSearchParamsObj = Object.fromEntries(urlPath.searchParams.entries());
-    const urlStrSplitSlashObj = Object.fromEntries(urlPath.pathname
-      .match(/[^\\/]+\/[^\\/]+/g)
-      .map(x => x.split('/'))
-    );
+    const splitUrlMatches = urlPath.pathname.match(/[^\\/]+\/[^\\/]+/g);
+    const urlStrSplitSlashObj = splitUrlMatches ? Object.fromEntries(splitUrlMatches.map(x => x.split('/'))) : {};
+
     const doesKeyExists = (_object, _key) => {
       return Object.keys(_object).some(value => value == _key);
     };
@@ -340,7 +339,7 @@ export class UrlPlugin {
     const urlStrPath = this.urlStateToUrlString(this.urlState);
     if (this.urlMode == 'history') {
       if (window.history && window.history.replaceState) {
-        const newUrlPath = `${this.urlHistoryBasePath}/${urlStrPath}`;
+        const newUrlPath = `${this.urlHistoryBasePath}${urlStrPath}`;
         window.history.replaceState({}, null, newUrlPath);
       }
     } else {
